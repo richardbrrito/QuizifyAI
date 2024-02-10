@@ -28,7 +28,7 @@ export const answerQuestion = async function answerQuestion(question) {
 
     console.log(relevantDocs);
 
-    const model = new ChatOpenAI({ modelName: "gpt-4", openAIApiKey: process.env.OPENAI_API_KEY });
+    const model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", openAIApiKey: process.env.OPENAI_API_KEY });
 
     const template = `Use the following pieces of context to answer the question at the end.
 If you don't know the answer, just say that you don't know, don't try to make up an answer.
