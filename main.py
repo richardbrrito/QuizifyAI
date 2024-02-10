@@ -13,7 +13,7 @@ st.set_page_config(
 )
 
 st.markdown("""
- <style>
+<style>
     .stButton>button {
         border: 1px solid #4CAF50; /* Green border */
         background-color: #4CAF50; /* Green background */
@@ -22,22 +22,16 @@ st.markdown("""
         cursor: pointer;
         font-size: 16px;
     }
-    .stButton>button:hover {
-        background-color: #8ef08e; /* Lighter green for hover */
-        color: black; /* Black text on hover */
-        outline: 2px solid black; /* Black outline on hover */
+    .stButton>button:hover, .stButton>button:active {
+        background-color: #8ef08e; /* Lighter green for hover and active (click) */
+        color: black; /* Black text on hover and active (click) */
+        outline: 2px solid black; /* Black outline on hover and active (click) */
         outline-offset: -2px;
     }
-    .stButton>button:active {
-        background-color: rgba(0, 0, 0, 0.1); /* Lighter opacity black on click */
-        border: 1px solid #4CAF50; /* Same green border */
-        color: black; /* Black text */
-        outline: 2px solid black; /* Same black outline */
-    }
-    </style>
+    </style>   
 """, unsafe_allow_html=True)
 
-st.header("Welcome to :green[Quizmify] your AI Learning Companion", help=None, divider=False)
+st.title("Welcome to :green[Quizmify] your AI Learning Companion", help=None)
 
 url = st.text_input("Enter a URL you would like to know more about!", value="URL", max_chars=None, key=None, type="default", help=None, autocomplete=None, on_change=None, args=None, kwargs=None, placeholder=None, disabled=False, label_visibility="visible")
 
@@ -55,11 +49,9 @@ if st.button("Generate Quiz"):
 
         progress_bar = st.progress(0)
         for percent_complete in range(100):
-            time.sleep(0.1)
+            time.sleep(0.03)
             progress_bar.progress(percent_complete + 1)
         progress_bar.empty()
-
-        st.write("Quiz is ready!")
     else:
         st.error("Please make sure all inputs are provided correctly.")
 
