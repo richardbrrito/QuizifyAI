@@ -103,13 +103,18 @@ if st.button("Generate Quiz"):
     if uploaded_file and num_questions > 0:
         st.write("Processing your request...")
 
-        progress_bar = st.progress(0)
-        for percent_complete in range(100):
-            time.sleep(0.03)
-            progress_bar.progress(percent_complete + 1)
-        progress_bar.empty()
+        # Save the uploaded file to a temporary path on your server
+        with open("temp_uploaded_pdf.pdf", "wb") as f:
+            f.write(uploaded_file.getbuffer())
 
-        st.write("Quiz is ready!")
-        nav_page("questions")
+        # Assuming the PDF is saved at 'temp_uploaded_pdf.pdf' on your server
+        questions = generate_questions_from_pdf("temp_uploaded_pdf.pdf")
+
+        if questions:
+            st.write("Quiz is ready!")
+            for question in questions:
+                st.write(question)
+        else:
+            st.error("Failed to generate questions.")
     else:
         st.error("Please make sure all inputs are provided correctly.")
