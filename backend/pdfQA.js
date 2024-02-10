@@ -5,25 +5,24 @@ import { ChatOpenAI } from "@langchain/openai";
 import { Document } from "langchain/document";
 import { loadPDF } from "./utils/pdfLoader.js";
 import dotenv from "dotenv";
+import { start } from "repl";
 dotenv.config();
 
-export const generateQuestions = async function generateQuestions(
-  pdfPath,
-  startPage,
-  endPage
-) {
-  const splitDocs = await loadPDF(pdfPath, startPage, endPage);
+export const generateQuestions = async function generateQuestions(pdfPath, startPage, endPage) {
+    console.log(pdfPath);
+    const splitDocs = await loadPDF(pdfPath, startPage, endPage);
 
-  const splitter = new RecursiveCharacterTextSplitter({
-    chunkSize: 1000,
-    chunkOverlap: 250,
-  });
+    console.log(splitDocs);
+    const splitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 1000,
+        chunkOverlap: 250,
+    });
 
-  const docsSummary = await splitter.splitDocuments([
-    new Document({ pageContent: splitDocs }),
-  ]);
+    const docsSummary = await splitter.splitDocuments([
+        new Document({ pageContent: splitDocs }),
+    ]);
 
-  const summaryTemplate = `
+    const summaryTemplate = `
 You are an expert in summarizing textbook .
 Your goal is to create a summary of a chapter.
 Below you find the contents of a chapter:
@@ -39,9 +38,9 @@ Total output will be a summary of the entire chapter and 10 questions the user c
 SUMMARY AND QUESTIONS:
 `;
 
-  const SUMMARY_PROMPT = PromptTemplate.fromTemplate(summaryTemplate);
+    const SUMMARY_PROMPT = PromptTemplate.fromTemplate(summaryTemplate);
 
-  const summaryRefineTemplate = `
+    const summaryRefineTemplate = `
 You are an expert in summarizing textbook chapters.
 Your goal is to create a summary of a chapter.
 We have provided an existing summary up to a certain point: {existing_answer}
@@ -60,23 +59,23 @@ Total output will be a summary of the entire chapter and 10 questions the user c
 SUMMARY AND QUESTIONS:
 `;
 
-  const SUMMARY_REFINE_PROMPT = PromptTemplate.fromTemplate(
-    summaryRefineTemplate
-  );
+    const SUMMARY_REFINE_PROMPT = PromptTemplate.fromTemplate(
+        summaryRefineTemplate
+    );
 
-  const llm = new ChatOpenAI({
-    modelName: "gpt-4",
-    openAIApiKey: process.env.OPEN_AI_API_KEY,
-  });
+    const llm = new ChatOpenAI({
+        modelName: "gpt-3.5-turbo",
+        openAIApiKey: process.env.OPEN_AI_API_KEY,
+    });
 
-  const summarizeChain = loadSummarizationChain(llm, {
-    type: "refine",
-    verbose: true,
-    questionPrompt: SUMMARY_PROMPT,
-    refinePrompt: SUMMARY_REFINE_PROMPT,
-  });
+    const summarizeChain = loadSummarizationChain(llm, {
+        type: "refine",
+        verbose: true,
+        questionPrompt: SUMMARY_PROMPT,
+        refinePrompt: SUMMARY_REFINE_PROMPT,
+    });
 
-  const summary = await summarizeChain.run(docsSummary);
+    const summary = await summarizeChain.run(docsSummary);
 
-  console.log(summary);
+    console.log(summary);
 };

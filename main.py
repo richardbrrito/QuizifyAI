@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit.components.v1 import html
 import time
 
 
@@ -6,7 +7,7 @@ st.set_page_config(
     page_title="Quizmify",
     page_icon="favicon.png",
     layout="centered",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
     menu_items={
         
     }
@@ -28,10 +29,16 @@ st.markdown("""
         outline: 2px solid black; /* Black outline on hover and active (click) */
         outline-offset: -2px;
     }
-    </style>   
+    .stButton>button:active {
+        background-color: rgba(0, 0, 0, 0.1); /* Lighter opacity black on click */
+        border: 1px solid #4CAF50; /* Same green border */
+        color: black; /* Black text */
+        outline: 2px solid black; /* Same black outline */
+    }
+    </style>
 """, unsafe_allow_html=True)
 
-st.title("Welcome to :green[Quizmify] your AI Learning Companion", help=None)
+st.header("Welcome to :green[Quizmify] your AI Learning Companion", help=None, divider=False)
 
 url = st.text_input("Enter a URL you would like to know more about!", value="URL", max_chars=None, key=None, type="default", help=None, autocomplete=None, on_change=None, args=None, kwargs=None, placeholder=None, disabled=False, label_visibility="visible")
 
@@ -52,6 +59,8 @@ if st.button("Generate Quiz"):
             time.sleep(0.03)
             progress_bar.progress(percent_complete + 1)
         progress_bar.empty()
+
+        st.write("Quiz is ready!")
     else:
         st.error("Please make sure all inputs are provided correctly.")
 
