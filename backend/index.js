@@ -1,6 +1,7 @@
 import express, { urlencoded } from 'express';
 import { answerQuestion } from './answering.js'
 import { generateQuestions } from './pdfQA.js';
+import { diff } from 'semver';
 
 const app = express();
 
@@ -38,7 +39,7 @@ app.post('/generate', async (req, res) => {
     }
 
     try {
-        const questions = await generateQuestions(pdfPath, startPage, endPage);
+        const questions = await generateQuestions(pdfPath, startPage, endPage, questionCount, difficulty);
         res.send({ 'questions': questions });
     } catch (err) {
         console.error(err);
