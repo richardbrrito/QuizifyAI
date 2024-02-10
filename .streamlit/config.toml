@@ -1,5 +1,7 @@
-[theme]
-primaryColor="#F63366"
+[Quizmify]
+base="dark"
+primary="#01DF67"
+primaryColor="#01DF67"
 backgroundColor="#FFFFFF"
 secondaryBackgroundColor="#F0F2F6"
 textColor="#262730"
