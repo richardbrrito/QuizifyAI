@@ -82,6 +82,18 @@ def generate_questions_from_pdf(pdf_path, start_page=3, end_page=5, questionCoun
     else:
         st.error("Failed to get a response from the backend.")
         return None
+    
+def get_answer(question):
+    url = "http://localhost:3000/answer"
+    payload = {"question": question, "answer": "My answer"}
+    response = requests.post(url, json=payload)
+
+    if response.status_code == 200:
+        json_data = response.json()
+        return json_data["response"]["gptAnswer"]["text"]
+    else:
+        st.error("Failed to get a response from the backend.")
+        return None
 
 
 option = st.selectbox("Select what type of questions you would like to be asked!", ["Multiple Choice Questions", "Free Response Questions"])
@@ -122,23 +134,8 @@ if st.button("Generate Quiz"):
                     # Set a unique key for each question's button in the session state
                     check_key = f"check_{i}"
                     
-                    # When the button is pressed, set the flag in session state
-                    if st.button(f"Check Answer for question {i}", key=check_key):
-                        st.session_state[check_key] = True
-
-                    # Check outside the button's 'if' block
-                    if st.session_state.get(check_key):
-                        response = requests.post("http://localhost:3000/answer", json={"question": question_text, "answer": user_answer})
-                        
-                        if response.status_code == 200:
-                            feedback = response.json()
-                            # Display feedback directly from ChatGPT response
-                            st.write(f"Feedback: {feedback['response']}")
-                        else:
-                            st.error("Failed to get feedback from the backend.")
-
-                        # Optionally, reset the flag to allow re-checking after modifications
-                        st.session_state[check_key] = False
+                    with st.expander(f"Click to reveal answer for question {i}", expanded=False):
+                        st.write(get_answer(question_text))
             else:
                 st.error("Failed to generate questions.")
         else:
