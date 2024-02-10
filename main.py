@@ -92,6 +92,18 @@ def generate_questions_from_pdf(
     else:
         st.error("Failed to get a response from the backend.")
         return None
+    
+def get_answer(question):
+    url = "http://localhost:3000/answer"
+    payload = {"question": question, "answer": "My answer"}
+    response = requests.post(url, json=payload)
+
+    if response.status_code == 200:
+        json_data = response.json()
+        return json_data["response"]["gptAnswer"]["text"]
+    else:
+        st.error("Failed to get a response from the backend.")
+        return None
 
 
 option = st.selectbox(
@@ -125,50 +137,52 @@ def fetch_chatgpt_answer(question):
 
 if st.button("Generate Quiz") or "questions" in st.session_state:
     if (url or uploaded_file) and num_questions > 0:
-        # Check if questions have already been generated
-        if "questions" not in st.session_state:
-            # Generate questions if not already done
-            questions = generate_questions_from_pdf(
-                "temp_uploaded_pdf.pdf",  # This should be replaced with actual file handling
-                start_page=1,
-                end_page=10,
-                questionCount=num_questions,
-                difficulty=difficulty,
-            )
-            st.session_state["questions"] = questions
+        st.write("Processing your request...")
 
-        if st.session_state["questions"]:
-            for i, question_text in enumerate(st.session_state["questions"], start=1):
-                st.write(f"Question {i}: {question_text}")
-                # Using session_state to store user answers to maintain them across reruns
-                user_answer_key = f"answer_{i}"
-                if user_answer_key not in st.session_state:
-                    st.session_state[user_answer_key] = ""
-                st.text_input(f"Your answer for question {i}", key=user_answer_key)
+        # Initialize progress bar
+        progress_bar = st.progress(0)
+        for percent_complete in range(100):
+            # time.sleep(0.03)  # Simulate a task
+            progress_bar.progress(percent_complete + 1)
+        progress_bar.empty()
 
-                # Collapsible section for the answer
-                # Inside the loop where you iterate over questions
-                with st.expander(f"See answer for question {i}"):
-                    # Check if the answer has already been fetched
-                    answer_key = f"answer_text_{i}"
-                    if answer_key not in st.session_state:
-                        # Fetch the answer and store it in session_state
-                        # Make sure to pass both the question text and the user's answer to the function
-                        user_answer = st.session_state.get(f"answer_{i}", "")
-                        chatgpt_answer = fetch_chatgpt_answer(
-                            question_text, user_answer
-                        )
-                        st.session_state[answer_key] = chatgpt_answer
+        # If an uploaded file is provided, process it
+        if uploaded_file:
+            # Save the uploaded file to a temporary path on your server
+            with open("temp_uploaded_pdf.pdf", "wb") as f:
+                f.write(uploaded_file.getbuffer())
 
-                    # Use a unique key for st.text_area by appending the loop index (i) to the key
-                    text_area_key = f"chatgpt_answer_{i}"
-                    st.text_area(
-                        "QuizifyAI Answer",
-                        value=st.session_state[answer_key],
-                        height=100,
-                        disabled=True,
-                        key=text_area_key,
-                    )
+            # Assuming the PDF is saved, generate questions from it
+            questions = generate_questions_from_pdf("temp_uploaded_pdf.pdf")
+
+            if questions:
+                # Display the questions and input boxes for answers here
+                for i, question_text in enumerate(questions, start=1):
+                    st.write(f"Question {i}: {question_text}")
+                    user_answer = st.text_input(f"Your answer for question {i}", key=f"answer_{i}")
+
+                    # Set a unique key for each question's button in the session state
+                    check_key = f"check_{i}"
+                    
+                    # When the button is pressed, set the flag in session state
+                    if st.button(f"Check Answer for question {i}", key=check_key):
+                        st.session_state[check_key] = True
+
+                    # Check outside the button's 'if' block
+                    if st.session_state.get(check_key):
+                        response = requests.post("http://localhost:3000/answer", json={"question": question_text, "answer": user_answer})
+                        
+                        if response.status_code == 200:
+                            feedback = response.json()
+                            # Display feedback directly from ChatGPT response
+                            st.write(f"Feedback: {feedback['response']}")
+                        else:
+                            st.error("Failed to get feedback from the backend.")
+
+                        # Optionally, reset the flag to allow re-checking after modifications
+                        st.session_state[check_key] = False
+            else:
+                st.error("Failed to generate questions.")
         else:
             st.error("Failed to generate questions.")
     else:
