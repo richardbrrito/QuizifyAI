@@ -6,7 +6,7 @@ st.set_page_config(
     page_title="Quizmify",
     page_icon="favicon.png",
     layout="centered",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
     menu_items={
         
     }
