@@ -13,20 +13,24 @@ app.get("/", (req, res) => {
 });
 
 app.post("/answer", async (req, res) => {
-  const question = req.body.question;
-  const studentAnswer = req.body.answer;
-  if (!question) {
-    return res.status(400).send({ error: "Question is required" });
-  }
-
-  try {
-    const answer = await answerQuestion(question, studentAnswer);
-    res.send(answer);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({ error: "Something went wrong" });
-  }
+    const question = req.body.question;
+    const studentAnswer = req.body.answer;
+  
+    if (!question || !studentAnswer) {
+      return res.status(400).send({ error: "Both question and answer are required" });
+    }
+  
+    try {
+      const response = await answerQuestion(question, studentAnswer);
+  
+      // Assuming 'response' contains the direct ChatGPT response
+      res.send({ response: response });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send({ error: "Something went wrong in processing the answer" });
+    }
 });
+  
 
 app.post("/generate", async (req, res) => {
   const pdfPath = req.body.pdfPath;

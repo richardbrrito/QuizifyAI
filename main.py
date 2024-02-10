@@ -100,7 +100,7 @@ if st.button("Generate Quiz"):
         # Initialize progress bar
         progress_bar = st.progress(0)
         for percent_complete in range(100):
-            time.sleep(0.1)  # Simulate a task
+            # time.sleep(0.03)  # Simulate a task
             progress_bar.progress(percent_complete + 1)
         progress_bar.empty()
 
@@ -114,20 +114,37 @@ if st.button("Generate Quiz"):
             questions = generate_questions_from_pdf("temp_uploaded_pdf.pdf")
 
             if questions:
-                st.write("Quiz is ready!")
-                for question in questions:
-                    st.write(question)
+                # Display the questions and input boxes for answers here
+                for i, question_text in enumerate(questions, start=1):
+                    st.write(f"Question {i}: {question_text}")
+                    user_answer = st.text_input(f"Your answer for question {i}", key=f"answer_{i}")
+
+                    # Set a unique key for each question's button in the session state
+                    check_key = f"check_{i}"
+                    
+                    # When the button is pressed, set the flag in session state
+                    if st.button(f"Check Answer for question {i}", key=check_key):
+                        st.session_state[check_key] = True
+
+                    # Check outside the button's 'if' block
+                    if st.session_state.get(check_key):
+                        response = requests.post("http://localhost:3000/answer", json={"question": question_text, "answer": user_answer})
+                        
+                        if response.status_code == 200:
+                            feedback = response.json()
+                            # Display feedback directly from ChatGPT response
+                            st.write(f"Feedback: {feedback['response']}")
+                        else:
+                            st.error("Failed to get feedback from the backend.")
+
+                        # Optionally, reset the flag to allow re-checking after modifications
+                        st.session_state[check_key] = False
             else:
                 st.error("Failed to generate questions.")
         else:
-            # If no uploaded file, but other conditions met, navigate based on option
-            st.error("Failed to generate questions.")
-            nav_page("questions")
-            if 'Free Response Questions' in option:
-                nav_page("frquestion")
-            if 'Multiple Choice Questions' in option:
-                nav_page("mcquestion")
-
+            # Handle case where there is no uploaded file but other conditions are met
+            st.error("Please provide a PDF document to generate questions from.")
     else:
         st.error("Please make sure all inputs are provided correctly.")
 
+        

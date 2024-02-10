@@ -1,33 +1,27 @@
 import streamlit as st
+import json
 
-st.setpage_config(
-    page_title="Quizmify",
-    page_icon="favicon.png",
-    layout="centered",
-    initial_sidebar_state="collapsed",
-    menu_items={
+st.set_page_config(page_title="Quizmify", page_icon="favicon.png")
 
-    }
-)
+st.header("Multiple Choice Questions")
 
-st.header("MCQuestion", help=None, divider=False)
+# Retrieve stored questions from session_state
+questions = st.session_state.get('questions', [])  # Default to an empty list if not set
 
-num_questions = st.session_state.get('num_questions')  # Default to 10 if not previously set
+# Display the questions
+for i, question in enumerate(questions, start=1):
+    question = json.loads(questions)  # Convert the string to a dictionary
+    st.subheader(f"Question {i}")
+    st.write(question['text'])
 
-st.write(f"Number of questions selected: {num_questions}")
-
-option = st.session_state.get('option')
-
-if option == "Multiple Choice Questions":
-    for i in range(int(num_questions)):
-        st.radio(f"Question {i+1}:", ["Option A", "Option B", "Option C", "Option D"], key=f"mcq{i}")
-
-
+    # Now you can safely use .get() since 'question' is a dictionary
+    options = question.get('options', [])
+    st.radio(f"Choose the correct answer:", options, key=f"mcq_{i}")
 
 st.markdown("""
  <style>
     [data-testid="collapsedControl"] {
-        display: none
+        display: none;
     }
-    </style>
+</style>
 """, unsafe_allow_html=True)
