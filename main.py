@@ -67,6 +67,8 @@ def nav_page(page_name, timeout_secs=3):
     """ % (page_name, timeout_secs)
     html(nav_script)
 
+
+
 st.header("Welcome to :green[Quizmify] your AI Learning Companion", help=None, divider=False)
 
 url = st.text_input("Enter a URL you would like to know more about!", value="URL", max_chars=None, key=None, type="default", help=None, autocomplete=None, on_change=None, args=None, kwargs=None, placeholder=None, disabled=False, label_visibility="visible")
@@ -89,7 +91,9 @@ def generate_questions_from_pdf(pdf_path, start_page=None, end_page=None):
         return None
 
 
-st.selectbox("Select what type of questions you would like to be asked!", ("Multiple Choice Quesions", "Free Response Questions"), index=0, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
+
+
+option = st.selectbox("Select what type of questions you would like to be asked!", (["Multiple Choice Questions", "Free Response Questions"]), index=0, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
 
 num_questions = st.number_input("How man questions do you want?", min_value=1, max_value=20, value="min", step=None, format=None, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder=None, disabled=False, label_visibility="visible")
 
@@ -99,18 +103,13 @@ if st.button("Generate Quiz"):
     if uploaded_file and num_questions > 0:
         st.write("Processing your request...")
 
-        # Save the uploaded file to a temporary path on your server
-        with open("temp_uploaded_pdf.pdf", "wb") as f:
-            f.write(uploaded_file.getbuffer())
+        progress_bar = st.progress(0)
+        for percent_complete in range(100):
+            time.sleep(0.03)
+            progress_bar.progress(percent_complete + 1)
+        progress_bar.empty()
 
-        # Assuming the PDF is saved at 'temp_uploaded_pdf.pdf' on your server
-        questions = generate_questions_from_pdf("temp_uploaded_pdf.pdf")
-
-        if questions:
-            st.write("Quiz is ready!")
-            for question in questions:
-                st.write(question)
-        else:
-            st.error("Failed to generate questions.")
+        st.write("Quiz is ready!")
+        nav_page("questions")
     else:
         st.error("Please make sure all inputs are provided correctly.")
