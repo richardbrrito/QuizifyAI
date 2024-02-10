@@ -4,7 +4,7 @@ import time
 import requests
 
 
-st.set_page_config(page_title="QuizifyAI", page_icon="favicon.png")
+st.set_page_config(page_title="QuizifyAI", page_icon="favicon.png", initial_sidebar_state="collapsed",)
 
 st.markdown(
     """
