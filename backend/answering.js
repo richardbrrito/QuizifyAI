@@ -33,7 +33,7 @@ export const answerQuestion = async function answerQuestion(question, answer) {
     openAIApiKey: process.env.OPENAI_API_KEY,
   });
 
-  const template = `
+  const judgeTemplate = `
     You are a grader, and your job is to judge a student's answer.
     Use the following pieces of context to judge the quality of the student's answer.
 Use as much of the context as possible when judging the answer.
@@ -44,14 +44,39 @@ Question: {question}
 
 Student's answer: ${answer}`;
 
-  const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever(), {
-    prompt: PromptTemplate.fromTemplate(template),
+  const answerTemplate = `Use the following pieces of context to answer the question at the end.
+If you don't know the answer, just say that you don't know, don't try to make up an answer.
+Use as much of the context as possible when answering the question.
+{context}
+Question: {question}
+Helpful Answer:`;
+
+  const judgeChain = RetrievalQAChain.fromLLM(
+    model,
+    vectorStore.asRetriever(),
+    {
+      prompt: PromptTemplate.fromTemplate(judgeTemplate),
+    }
+  );
+
+  let judgement = await judgeChain.invoke({
+    query: question,
   });
 
-  let response = await chain.invoke({
-    question
+  const answerChain = RetrievalQAChain.fromLLM(
+    model,
+    vectorStore.asRetriever(),
+    {
+      prompt: PromptTemplate.fromTemplate(answerTemplate),
+    }
+  );
+
+  let gptAnswer = await answerChain.invoke({
+    query: question,
   });
 
-  console.log(response);
-  return response;
+  return {
+    judgement,
+    gptAnswer,
+  };
 };
