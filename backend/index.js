@@ -14,12 +14,13 @@ app.get('/', (req, res) => {
 
 app.post('/answer', async (req, res) => {
     const question = req.body.question;
+    const studentAnswer = req.body.answer;
     if (!question) {
         return res.status(400).send({ error: 'Question is required' });
     }
 
     try {
-        const answer = await answerQuestion(question);
+        const answer = await answerQuestion(question, studentAnswer);
         res.send(answer);
     } catch (err) {
         console.error(err);
