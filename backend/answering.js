@@ -37,6 +37,7 @@ export const answerQuestion = async function answerQuestion(question, answer) {
     You are a grader, and your job is to judge a student's answer.
     Use the following pieces of context to judge the quality of the student's answer.
 Use as much of the context as possible when judging the answer.
+You must also provide a letter grade for the final verdict (e.g., A, B, C, etc.)
 
 {context}
 
