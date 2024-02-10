@@ -4,13 +4,7 @@ import time
 import requests
 
 
-st.set_page_config(
-    page_title="Quizmify",
-    page_icon="favicon.png",
-    layout="centered",
-    initial_sidebar_state="collapsed",
-    menu_items={},
-)
+st.set_page_config(page_title="Quizmify", page_icon="favicon.png")
 
 st.markdown(
     """
@@ -40,8 +34,7 @@ st.markdown(
     }
     </style>
 """,
-    unsafe_allow_html=True,
-)
+    unsafe_allow_html=True,)
 
 
 def nav_page(page_name, timeout_secs=3):
@@ -73,30 +66,13 @@ def nav_page(page_name, timeout_secs=3):
     html(nav_script)
 
 
-st.header(
-    "Welcome to :green[Quizmify] your AI Learning Companion", help=None, divider=False
-)
+st.header("Welcome to :green[Quizmify] your AI Learning Companion")
 
-url = st.text_input(
-    "Enter a URL you would like to know more about!",
-    value="URL",
-    max_chars=None,
-    key=None,
-    type="default",
-    help=None,
-    autocomplete=None,
-    on_change=None,
-    args=None,
-    kwargs=None,
-    placeholder=None,
-    disabled=False,
-    label_visibility="visible",
-)
+url = st.text_input("Enter a URL you would like to know more about!")
 
 uploaded_file = st.file_uploader("Upload Your PDF Document Here!", type=["pdf"])
 
-
-def generate_questions_from_pdf(pdf_path, start_page, end_page, questionCount, difficulty):
+def generate_questions_from_pdf(pdf_path, start_page=3, end_page=5, questionCount=1, difficulty="easy"):
     url = "http://localhost:3000/generate"  # URL to your backend's /generate endpoint
     payload = {"pdfPath": pdf_path, "startPage": start_page, "endPage": end_page, "questionCount": questionCount, "difficulty": difficulty}
     response = requests.post(url, json=payload)
@@ -108,69 +84,50 @@ def generate_questions_from_pdf(pdf_path, start_page, end_page, questionCount, d
         return None
 
 
-option = st.selectbox(
-    "Select what type of questions you would like to be asked!",
-    (["Multiple Choice Questions", "Free Response Questions"]),
-    index=0,
-    key=None,
-    help=None,
-    on_change=None,
-    args=None,
-    kwargs=None,
-    placeholder="Choose an option",
-    disabled=False,
-    label_visibility="visible",
-)
+option = st.selectbox("Select what type of questions you would like to be asked!", ["Multiple Choice Questions", "Free Response Questions"])
 
-num_questions = st.number_input(
-    "How man questions do you want?",
-    min_value=1,
-    max_value=20,
-    value="min",
-    step=None,
-    format=None,
-    key=None,
-    help=None,
-    on_change=None,
-    args=None,
-    kwargs=None,
-    placeholder=None,
-    disabled=False,
-    label_visibility="visible",
-)
+num_questions = st.number_input("How many questions do you want?", min_value=1, max_value=20, value=1)
 
-st.selectbox(
-    "Select what level of difficultiy you want!",
-    ("Easy", "Medium", "Hard"),
-    index=0,
-    key=None,
-    help=None,
-    on_change=None,
-    args=None,
-    kwargs=None,
-    placeholder="Choose an option",
-    disabled=False,
-    label_visibility="visible",
-)
+st.session_state['num_questions'] = num_questions
+
+difficulty = st.selectbox("Select the level of difficulty you want!", ["Easy", "Medium", "Hard"])
 
 if st.button("Generate Quiz"):
-    if uploaded_file and num_questions > 0:
+    # Check if the necessary inputs are provided
+    if (url or uploaded_file) and num_questions > 0:
         st.write("Processing your request...")
 
-        # Save the uploaded file to a temporary path on your server
-        with open("temp_uploaded_pdf.pdf", "wb") as f:
-            f.write(uploaded_file.getbuffer())
+        # Initialize progress bar
+        progress_bar = st.progress(0)
+        for percent_complete in range(100):
+            time.sleep(0.1)  # Simulate a task
+            progress_bar.progress(percent_complete + 1)
+        progress_bar.empty()
 
-        # Assuming the PDF is saved at 'temp_uploaded_pdf.pdf' on your server
-        questions = generate_questions_from_pdf("temp_uploaded_pdf.pdf")
+        # If an uploaded file is provided, process it
+        if uploaded_file:
+            # Save the uploaded file to a temporary path on your server
+            with open("temp_uploaded_pdf.pdf", "wb") as f:
+                f.write(uploaded_file.getbuffer())
 
-        st.write(questions)
+            # Assuming the PDF is saved, generate questions from it
+            questions = generate_questions_from_pdf("temp_uploaded_pdf.pdf")
 
-        if questions:
-            st.write("Quiz is ready!")
-            for question in questions:
-                st.write(question)
+            if questions:
+                st.write("Quiz is ready!")
+                for question in questions:
+                    st.write(question)
+            else:
+                st.error("Failed to generate questions.")
         else:
+            # If no uploaded file, but other conditions met, navigate based on option
             st.error("Failed to generate questions.")
+            nav_page("questions")
+            if 'Free Response Questions' in option:
+                nav_page("frquestion")
+            if 'Multiple Choice Questions' in option:
+                nav_page("mcquestion")
+
     else:
         st.error("Please make sure all inputs are provided correctly.")
+
