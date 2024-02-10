@@ -66,7 +66,7 @@ SUMMARY AND QUESTIONS:
 
     const llm = new ChatOpenAI({
         modelName: "gpt-3.5-turbo",
-        openAIApiKey: process.env.OPEN_AI_API_KEY,
+        openAIApiKey: process.env.OPENAI_API_KEY,
     });
 
     const summarizeChain = loadSummarizationChain(llm, {

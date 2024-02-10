@@ -9,7 +9,7 @@ dotenv.config();
 
 export const answerQuestion = async function answerQuestion(question, answer) {
   const embeddings = new OpenAIEmbeddings({
-    openAIApiKey: process.env.OPEN_AI_API_KEY,
+    openAIApiKey: process.env.OPENAI_API_KEY,
   });
 
   const pinecone = new Pinecone({
