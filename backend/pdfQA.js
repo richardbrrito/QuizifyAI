@@ -6,9 +6,10 @@ import { Document } from "langchain/document";
 import { loadPDF } from "./utils/pdfLoader.js";
 import dotenv from "dotenv";
 import { start } from "repl";
+import { extractQuestions } from "./utils/extractQuestions.js";
 dotenv.config();
 
-export const generateQuestions = async function generateQuestions(pdfPath, startPage, endPage) {
+export const generateQuestions = async function generateQuestions(pdfPath, startPage, endPage, questionCount, difficulty) {
     console.log(pdfPath);
     const splitDocs = await loadPDF(pdfPath, startPage, endPage);
 
@@ -31,9 +32,9 @@ Below you find the contents of a chapter:
 --------
 
 The chapter contents will also be used as the basis for a question and answer bot.
-Provide 10 questions that could be asked about the chapter. Make these questions very specific.
+Provide ${questionCount} ${difficulty} difficulty questions that could be asked about the chapter. Make these questions very specific.
 
-Total output will be a summary of the entire chapter and 10 questions the user could ask of the chapter.
+Total output will be a summary of the entire chapter and ${questionCount} ${difficulty} difficulty questions the user could ask of the chapter.
 
 SUMMARY AND QUESTIONS:
 `;
@@ -52,9 +53,9 @@ Below you find the contents of a chapter:
 
 Given the new context, refine the summary and 10 questions.
 The chapter contents will also be used as the basis for a question and answer bot.
-Provide 10 questions that could be asked about the chapter. Make these questions very specific.
+Provide ${questionCount} ${difficulty} difficulty questions that could be asked about the chapter. Make these questions very specific.
 If the context isn't useful, return the original summary and questions.
-Total output will be a summary of the entire chapter and 10 questions the user could ask of the chapter.
+Total output will be a summary of the entire chapter and ${questionCount} ${difficulty}  difficulty questions the user could ask of the chapter.
 
 SUMMARY AND QUESTIONS:
 `;
@@ -76,6 +77,6 @@ SUMMARY AND QUESTIONS:
     });
 
     const summary = await summarizeChain.run(docsSummary);
-
-    console.log(summary);
+    const questionArray = extractQuestions(summary)
+    return questionArray;
 };
