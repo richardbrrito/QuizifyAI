@@ -3,15 +3,14 @@ import { OpenAIEmbeddings } from "@langchain/openai";
 import { RetrievalQAChain } from "langchain/chains";
 import { ChatOpenAI } from "@langchain/openai";
 import { PromptTemplate } from "@langchain/core/prompts";
-import { Chroma } from "@langchain/community/vectorstores/chroma";
 import { Document } from "langchain/document";
 import { loadPDF } from "./utils/pdfLoader.js";
-import { WebPDFLoader } from "langchain/document_loaders/web/pdf";
+import dotenv from "dotenv";
+dotenv.config();
 
 export const answerQuestion = async function answerQuestion(question) {
-    const openAIApiKey = "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";
 
-// URI to locally stored PDF (NOT URL)
+  // URI to locally stored PDF (NOT URL)
 const pdfPath =
   "/home/mohamed/Downloads/Deep Learning by Ian Goodfellow, Yoshua Bengio, Aaron Courville (z-lib.org).pdf";
 const startPage = 114;
@@ -26,13 +25,18 @@ const splitter = new RecursiveCharacterTextSplitter({
 
 const splitDocs = await splitter.splitDocuments([new Document({pageContent: docs})]);
 
-const embeddings = new OpenAIEmbeddings({ openAIApiKey });
+const embeddings = new OpenAIEmbeddings({ openAIApiKey: process.env.OPEN_AI_API_KEY });
 
-const vectorStore = await Chroma.fromExistingCollection(embeddings, {
-  collectionName: "deep-learning-114-115",
+const pinecone = new Pinecone({
+  apiKey: process.env.PINECONE_API_KEY,
 });
 
-await vectorStore.addDocuments(splitDocs);
+const pineconeIndex = pinecone.Index("deep-learning");
+
+const vectorStore = await PineconeStore.fromExistingIndex(
+  embeddings,
+  { pineconeIndex }
+);
 
 // Query data
 
