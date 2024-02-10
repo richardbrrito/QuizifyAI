@@ -67,7 +67,7 @@ def nav_page(page_name, timeout_secs=3):
     html(nav_script)
 
 
-st.header("Welcome to :green[Quizmify] your AI Learning Companion")
+st.header("Welcome to :green[Quizmify] your AI Learning Companion!")
 
 url = st.text_input("Enter a URL you would like to know more about!")
 
