@@ -34,6 +34,9 @@ st.markdown("""
         color: black; /* Black text */
         outline: 2px solid black; /* Same black outline */
     }
+    [data-testid="collapsedControl"] {
+        display: none
+    }
     </style>
 """, unsafe_allow_html=True)
 
