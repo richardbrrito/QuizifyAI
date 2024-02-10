@@ -6,3 +6,7 @@ backgroundColor="#FFFFFF"
 secondaryBackgroundColor="#F0F2F6"
 textColor="#262730"
 font="sans serif"
+
+[api_keys]
+OPENAI_API_KEY = "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"
+PINECONE_API_KEY = "3b4a7373-b1db-4069-a483-587d3ffaf94b"
