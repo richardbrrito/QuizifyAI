@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 st.markdown("""
-<style>
+ <style>
     .stButton>button {
         border: 1px solid #4CAF50; /* Green border */
         background-color: #4CAF50; /* Green background */
@@ -23,10 +23,10 @@ st.markdown("""
         cursor: pointer;
         font-size: 16px;
     }
-    .stButton>button:hover, .stButton>button:active {
-        background-color: #8ef08e; /* Lighter green for hover and active (click) */
-        color: black; /* Black text on hover and active (click) */
-        outline: 2px solid black; /* Black outline on hover and active (click) */
+    .stButton>button:hover {
+        background-color: #8ef08e; /* Lighter green for hover */
+        color: black; /* Black text on hover */
+        outline: 2px solid black; /* Black outline on hover */
         outline-offset: -2px;
     }
     .stButton>button:active {
@@ -35,8 +35,36 @@ st.markdown("""
         color: black; /* Black text */
         outline: 2px solid black; /* Same black outline */
     }
+    [data-testid="collapsedControl"] {
+        display: none
+    }
     </style>
 """, unsafe_allow_html=True)
+
+def nav_page(page_name, timeout_secs=3):
+    nav_script = """
+        <script type="text/javascript">
+            function attempt_nav_page(page_name, start_time, timeout_secs) {
+                var links = window.parent.document.getElementsByTagName("a");
+                for (var i = 0; i < links.length; i++) {
+                    if (links[i].href.toLowerCase().endsWith("/" + page_name.toLowerCase())) {
+                        links[i].click();
+                        return;
+                    }
+                }
+                var elasped = new Date() - start_time;
+                if (elasped < timeout_secs * 1000) {
+                    setTimeout(attempt_nav_page, 100, page_name, start_time, timeout_secs);
+                } else {
+                    alert("Unable to navigate to page '" + page_name + "' after " + timeout_secs + " second(s).");
+                }
+            }
+            window.addEventListener("load", function() {
+                attempt_nav_page("%s", new Date(), %d);
+            });
+        </script>
+    """ % (page_name, timeout_secs)
+    html(nav_script)
 
 st.header("Welcome to :green[Quizmify] your AI Learning Companion", help=None, divider=False)
 
@@ -61,6 +89,6 @@ if st.button("Generate Quiz"):
         progress_bar.empty()
 
         st.write("Quiz is ready!")
+        nav_page("questions")
     else:
         st.error("Please make sure all inputs are provided correctly.")
-
