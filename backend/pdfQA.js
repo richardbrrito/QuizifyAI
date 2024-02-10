@@ -6,6 +6,7 @@ import { Document } from "langchain/document";
 import { loadPDF } from "./utils/pdfLoader.js";
 import dotenv from "dotenv";
 import { start } from "repl";
+import { extractQuestions } from "./utils/extractQuestions.js";
 dotenv.config();
 
 export const generateQuestions = async function generateQuestions(pdfPath, startPage, endPage) {
@@ -76,6 +77,6 @@ SUMMARY AND QUESTIONS:
     });
 
     const summary = await summarizeChain.run(docsSummary);
-
-    console.log(summary);
+    const questionArray = extractQuestions(summary)
+    return questionArray;
 };

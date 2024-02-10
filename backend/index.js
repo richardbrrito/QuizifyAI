@@ -26,7 +26,7 @@ app.post('/answer', async (req, res) => {
     }
 });
 
-app.post('/generate', (req, res) => {
+app.post('/generate', async (req, res) => {
     const pdfPath = req.body.pdfPath;
     const startPage = Number(req.body.startPage);
     const endPage = Number(req.body.endPage);
@@ -36,8 +36,8 @@ app.post('/generate', (req, res) => {
     }
 
     try {
-        const questions = generateQuestions(pdfPath, startPage, endPage);
-        res.send(questions);
+        const questions = await generateQuestions(pdfPath, startPage, endPage);
+        res.send({ 'questions': questions });
     } catch (err) {
         console.error(err);
         res.status(500).send({ error: 'Something went wrong' })
