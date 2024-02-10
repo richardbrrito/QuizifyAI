@@ -9,12 +9,11 @@ st.set_page_config(
     page_icon="favicon.png",
     layout="centered",
     initial_sidebar_state="collapsed",
-    menu_items={
-        
-    }
+    menu_items={},
 )
 
-st.markdown("""
+st.markdown(
+    """
  <style>
     .stButton>button {
         border: 1px solid #4CAF50; /* Green border */
@@ -40,7 +39,10 @@ st.markdown("""
         display: none
     }
     </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
+
 
 def nav_page(page_name, timeout_secs=3):
     nav_script = """
@@ -64,40 +66,92 @@ def nav_page(page_name, timeout_secs=3):
                 attempt_nav_page("%s", new Date(), %d);
             });
         </script>
-    """ % (page_name, timeout_secs)
+    """ % (
+        page_name,
+        timeout_secs,
+    )
     html(nav_script)
 
 
+st.header(
+    "Welcome to :green[Quizmify] your AI Learning Companion", help=None, divider=False
+)
 
-st.header("Welcome to :green[Quizmify] your AI Learning Companion", help=None, divider=False)
+url = st.text_input(
+    "Enter a URL you would like to know more about!",
+    value="URL",
+    max_chars=None,
+    key=None,
+    type="default",
+    help=None,
+    autocomplete=None,
+    on_change=None,
+    args=None,
+    kwargs=None,
+    placeholder=None,
+    disabled=False,
+    label_visibility="visible",
+)
 
-url = st.text_input("Enter a URL you would like to know more about!", value="URL", max_chars=None, key=None, type="default", help=None, autocomplete=None, on_change=None, args=None, kwargs=None, placeholder=None, disabled=False, label_visibility="visible")
+uploaded_file = st.file_uploader("Upload Your PDF Document Here!", type=["pdf"])
 
-uploaded_file = st.file_uploader("Upload Your PDF Document Here!", type=['pdf'])
 
-def generate_questions_from_pdf(pdf_path, start_page=None, end_page=None):
-    url = 'http://localhost:3000/generate'  # URL to your backend's /generate endpoint
-    payload = {
-        'pdfPath': pdf_path,
-        'startPage': start_page,
-        'endPage': end_page
-    }
+def generate_questions_from_pdf(pdf_path, start_page, end_page, questionCount, difficulty):
+    url = "http://localhost:3000/generate"  # URL to your backend's /generate endpoint
+    payload = {"pdfPath": pdf_path, "startPage": start_page, "endPage": end_page, "questionCount": questionCount, "difficulty": difficulty}
     response = requests.post(url, json=payload)
-    
+
     if response.status_code == 200:
-        return response.json().get('questions')
+        return response.json().get("questions")
     else:
-        st.error('Failed to get a response from the backend.')
+        st.error("Failed to get a response from the backend.")
         return None
 
 
+option = st.selectbox(
+    "Select what type of questions you would like to be asked!",
+    (["Multiple Choice Questions", "Free Response Questions"]),
+    index=0,
+    key=None,
+    help=None,
+    on_change=None,
+    args=None,
+    kwargs=None,
+    placeholder="Choose an option",
+    disabled=False,
+    label_visibility="visible",
+)
 
+num_questions = st.number_input(
+    "How man questions do you want?",
+    min_value=1,
+    max_value=20,
+    value="min",
+    step=None,
+    format=None,
+    key=None,
+    help=None,
+    on_change=None,
+    args=None,
+    kwargs=None,
+    placeholder=None,
+    disabled=False,
+    label_visibility="visible",
+)
 
-option = st.selectbox("Select what type of questions you would like to be asked!", (["Multiple Choice Questions", "Free Response Questions"]), index=0, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
-
-num_questions = st.number_input("How man questions do you want?", min_value=1, max_value=20, value="min", step=None, format=None, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder=None, disabled=False, label_visibility="visible")
-
-st.selectbox("Select what level of difficultiy you want!", ("Easy", "Medium", "Hard"), index=0, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
+st.selectbox(
+    "Select what level of difficultiy you want!",
+    ("Easy", "Medium", "Hard"),
+    index=0,
+    key=None,
+    help=None,
+    on_change=None,
+    args=None,
+    kwargs=None,
+    placeholder="Choose an option",
+    disabled=False,
+    label_visibility="visible",
+)
 
 if st.button("Generate Quiz"):
     if uploaded_file and num_questions > 0:
@@ -109,6 +163,8 @@ if st.button("Generate Quiz"):
 
         # Assuming the PDF is saved at 'temp_uploaded_pdf.pdf' on your server
         questions = generate_questions_from_pdf("temp_uploaded_pdf.pdf")
+
+        st.write(questions)
 
         if questions:
             st.write("Quiz is ready!")
