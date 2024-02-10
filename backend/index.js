@@ -30,6 +30,8 @@ app.post('/generate', async (req, res) => {
     const pdfPath = req.body.pdfPath;
     const startPage = Number(req.body.startPage);
     const endPage = Number(req.body.endPage);
+    const questionCount = req.body.questionCount;
+    const difficulty = req.body.difficulty;
 
     if (!pdfPath) {
         return res.status(400).send({ error: 'PDF is required' });
