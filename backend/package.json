@@ -5,6 +5,8 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
+    "@langchain/pinecone": "^0.0.3",
+    "@pinecone-database/pinecone": "^2.0.1",
     "abbrev": "^1.1.1",
     "abort-controller": "^3.0.0",
     "accepts": "^1.3.8",

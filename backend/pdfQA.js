@@ -7,7 +7,11 @@ import { loadPDF } from "./utils/pdfLoader.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-export const generateQuestions = async function generateQuestions(pdfPath, startPage, endPage) {
+export const generateQuestions = async function generateQuestions(
+  pdfPath,
+  startPage,
+  endPage
+) {
   const splitDocs = await loadPDF(pdfPath, startPage, endPage);
 
   const splitter = new RecursiveCharacterTextSplitter({
