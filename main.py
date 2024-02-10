@@ -110,13 +110,40 @@ difficulty = st.selectbox(
 )
 
 
+# def fetch_chatgpt_feedback(question, user_answer):
+#     try:
+#         response = requests.post("http://localhost:3000/feedback", json={"question": question, "userAnswer": user_answer})
+#         response.raise_for_status()  # Raises an HTTPError if the response status code is 4XX or 5XX
+#         # Check if the response header indicates JSON content
+#         if 'application/json' in response.headers.get('Content-Type'):
+#             return response.json().get("feedback")
+#         else:
+#             st.error("Response content is not in JSON format.")
+#             return "No feedback available due to incorrect response format."
+#     except requests.exceptions.HTTPError as http_err:
+#         st.error(f"HTTP error occurred: {http_err}")  # HTTP error
+#     except requests.exceptions.ConnectionError as conn_err:
+#         st.error(f"Error connecting to the server: {conn_err}")  # Connection error
+#     except requests.exceptions.Timeout as timeout_err:
+#         st.error(f"Timeout error: {timeout_err}")  # Timeout error
+#     except requests.exceptions.RequestException as req_err:
+#         st.error(f"An error occurred while handling your request: {req_err}")  # Other errors
+#     except ValueError as json_err:  # Includes JSONDecodeError
+#         st.error(f"Error decoding JSON response: {json_err}")  # JSON decode error
+
+#     # Return a default message if an error occurs
+#     return "No feedback available due to an error."
+
 def fetch_chatgpt_feedback(question, user_answer):
-    response = requests.post("http://localhost:3000/feedback", json={"question": question, "userAnswer": user_answer})
-    if response.status_code == 200 or 400:
-        return response.json().get("feedback")
-    else:
-        st.error(f"Failed to get feedback. Status Code: {response.status_code}")
-        return "No feedback available."
+    try:
+        response = requests.post("http://localhost:3000/feedback", json={"question": question, "userAnswer": user_answer})
+        response.raise_for_status()
+        feedback_data = response.json()
+        feedback = feedback_data.get("judgement", "No judgement provided.") + "\n" + feedback_data.get("gptAnswer", "No suggested answer provided.")
+        return feedback
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
+        return "No feedback available due to an error."
     
 if st.button("Generate Quiz") or "questions" in st.session_state:
     if (url or uploaded_file) and num_questions > 0:
@@ -135,45 +162,21 @@ if st.button("Generate Quiz") or "questions" in st.session_state:
         if st.session_state["questions"]:
             for i, question_text in enumerate(st.session_state["questions"], start=1):
                 st.write(f"Question {i}: {question_text}")
-                # Using session_state to store user answers to maintain them across reruns
                 user_answer_key = f"answer_{i}"
                 if user_answer_key not in st.session_state:
                     st.session_state[user_answer_key] = ""
                 st.text_input(f"Your answer for question {i}", key=user_answer_key)
 
-                # Place the snippet here
+                # Button to get feedback for each question
                 if st.button(f"Get Feedback for Question {i}"):
                     user_answer = st.session_state[user_answer_key]
-                    feedback = fetch_chatgpt_feedback(question_text, user_answer)  # Make sure this function is defined and correctly implemented
+                    feedback = fetch_chatgpt_feedback(question_text, user_answer)
                     st.session_state[f"feedback_{i}"] = feedback  # Save feedback in session state
 
-                # Optionally, display feedback if it's already fetched
+                # Display feedback inside a box with the title "QuizifyAI Answer"
                 if f"feedback_{i}" in st.session_state:
-                    st.write(f"Feedback for Question {i}: {st.session_state[f'feedback_{i}']}")
-
-                # Collapsible section for the answer
-                # Inside the loop where you iterate over questions
-                with st.expander(f"See answer for question {i}"):
-                    # Check if the answer has already been fetched
-                    answer_key = f"answer_text_{i}"
-                    if answer_key not in st.session_state:
-                        # Fetch the answer and store it in session_state
-                        # Make sure to pass both the question text and the user's answer to the function
-                        user_answer = st.session_state.get(f"answer_{i}", "")
-                        chatgpt_answer = fetch_chatgpt_feedback(
-                            question_text, user_answer
-                        )
-                        st.session_state[answer_key] = chatgpt_answer
-
-                    # Use a unique key for st.text_area by appending the loop index (i) to the key
-                    text_area_key = f"chatgpt_answer_{i}"
-                    st.text_area(
-                        "QuizifyAI Answer",
-                        value=st.session_state[answer_key],
-                        height=100,
-                        disabled=True,
-                        key=text_area_key,
-                    )
+                    with st.expander(f"QuizifyAI Answer for Question {i}"):
+                        st.text_area("", value=st.session_state[f"feedback_{i}"], height=100, disabled=True)
         else:
             st.error("Failed to generate questions.")
     else:

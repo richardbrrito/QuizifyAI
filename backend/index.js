@@ -62,3 +62,18 @@ app.listen(3000, () => {
   console.log("App is listening on port 3000");
 });
 
+app.post("/feedback", async (req, res) => {
+    const { question, userAnswer } = req.body;
+
+    if (!question || !userAnswer) {
+        return res.status(400).json({ error: "Question and user answer are required." });
+    }
+
+    try {
+        const { judgement, gptAnswer } = await answerQuestion(question, userAnswer);
+        res.json({ judgement: judgement.text, gptAnswer: gptAnswer.text });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Internal server error while generating feedback." });
+    }
+});
