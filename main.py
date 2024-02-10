@@ -112,7 +112,7 @@ difficulty = st.selectbox(
 
 def fetch_chatgpt_feedback(question, user_answer):
     response = requests.post("http://localhost:3000/feedback", json={"question": question, "userAnswer": user_answer})
-    if response.status_code == 200:
+    if response.status_code == 200 or 400:
         return response.json().get("feedback")
     else:
         st.error(f"Failed to get feedback. Status Code: {response.status_code}")
@@ -124,7 +124,7 @@ if st.button("Generate Quiz") or "questions" in st.session_state:
         if "questions" not in st.session_state:
             # Generate questions if not already done
             questions = generate_questions_from_pdf(
-                "temp_uploaded_pdf.pdf",  # This should be replaced with actual file handling
+                "/Users/kevin/Documents/GitHub/Quizmify/temp_uploaded_pdf.pdf",  # This should be replaced with actual file handling
                 start_page=1,
                 end_page=10,
                 questionCount=num_questions,
