@@ -61,3 +61,19 @@ app.post("/generate", async (req, res) => {
 app.listen(3000, () => {
   console.log("App is listening on port 3000");
 });
+
+app.post("/feedback", async (req, res) => {
+    const { question, userAnswer } = req.body;
+
+    if (!question || !userAnswer) {
+        return res.status(400).send({ error: "Question and user answer are required." });
+    }
+
+    try {
+        const feedback = await answerQuestion(question, userAnswer);  // Assuming this function exists and returns feedback
+        res.json({ feedback });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ error: "Error processing feedback." });
+    }
+});

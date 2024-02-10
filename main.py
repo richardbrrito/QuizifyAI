@@ -110,16 +110,13 @@ difficulty = st.selectbox(
 )
 
 
-def fetch_chatgpt_answer(question, user_answer):
-    answer_url = "http://localhost:3000/answer"
-    payload = {"question": question, "answer": user_answer}
-    response = requests.post(answer_url, json=payload)
-
+def fetch_chatgpt_feedback(question, user_answer):
+    response = requests.post("http://localhost:3000/feedback", json={"question": question, "userAnswer": user_answer})
     if response.status_code == 200:
-        answer = response.json().get("response")  # Adjust according to your actual response structure
-        return answer
+        return response.json().get("feedback")
     else:
-        return "Failed to get a response from the backend. Status Code: {}".format(response.status_code)
+        st.error(f"Failed to get feedback. Status Code: {response.status_code}")
+        return "No feedback available."
     
 if st.button("Generate Quiz") or "questions" in st.session_state:
     if (url or uploaded_file) and num_questions > 0:
@@ -144,6 +141,16 @@ if st.button("Generate Quiz") or "questions" in st.session_state:
                     st.session_state[user_answer_key] = ""
                 st.text_input(f"Your answer for question {i}", key=user_answer_key)
 
+                # Place the snippet here
+                if st.button(f"Get Feedback for Question {i}"):
+                    user_answer = st.session_state[user_answer_key]
+                    feedback = fetch_chatgpt_feedback(question_text, user_answer)  # Make sure this function is defined and correctly implemented
+                    st.session_state[f"feedback_{i}"] = feedback  # Save feedback in session state
+
+                # Optionally, display feedback if it's already fetched
+                if f"feedback_{i}" in st.session_state:
+                    st.write(f"Feedback for Question {i}: {st.session_state[f'feedback_{i}']}")
+
                 # Collapsible section for the answer
                 # Inside the loop where you iterate over questions
                 with st.expander(f"See answer for question {i}"):
@@ -153,7 +160,7 @@ if st.button("Generate Quiz") or "questions" in st.session_state:
                         # Fetch the answer and store it in session_state
                         # Make sure to pass both the question text and the user's answer to the function
                         user_answer = st.session_state.get(f"answer_{i}", "")
-                        chatgpt_answer = fetch_chatgpt_answer(
+                        chatgpt_answer = fetch_chatgpt_feedback(
                             question_text, user_answer
                         )
                         st.session_state[answer_key] = chatgpt_answer
