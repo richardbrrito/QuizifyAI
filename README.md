@@ -16,7 +16,7 @@
 
 - Python 3.8 or higher
 - Streamlit
-- Additional Python packages as specified in `requirements.txt` (this file might be located in the root or within a specific directory; please specify the location)
+- Additional Python packages as specified in `requirements.txt`
 
 ## Installation
 
